@@ -8,7 +8,6 @@ USER_TOKEN = ''
 def intersect(a, b):
     return list(set(a) & set(b))
 
-
 class VKBase:
     APP_ID = 520662368
     VK_AUTH_URL = 'https://oauth.vk.com/authorize'
@@ -18,7 +17,7 @@ class VKBase:
 
     @staticmethod
     def get_auth_url():
-      auth_data = {
+        auth_data = {
             'client_id': VKUser.APP_ID,
             'redirect_url': 'https://oauth.vk.com/blank.html',
             'display': 'page',
@@ -36,8 +35,7 @@ class VKBase:
         )
         if data:
             params = {**params, **data}
-        return requests.get(url, params=params)
-
+            return requests.get(url, params=params)
 
 class VKUser(VKBase):
     user_id = None
@@ -89,10 +87,10 @@ class VKUser(VKBase):
         return user
 
     def get_friends(self, user_id=None):
-      data = dict(
-        user_id=user_id if user_id else self.user_id,
-        count=1000,
-        fields=['nickname', 'site']
+        data = dict(
+            user_id=user_id if user_id else self.user_id,
+            count=1000,
+            fields=['nickname', 'site']
         )
         response = self.make_get_request('friends.get', data)
         items = response.json()['response']['items']
@@ -105,31 +103,29 @@ class VKUser(VKBase):
         common_friends.sort()
         return common_friends
 
-
 class VKUsers(VKBase):
-  def get(self, user_id):
-    data = dict(
-      user_ids=user_id,
-      fields=['nickname', 'site']
+    def get(self, user_id):
+        data = dict(
+            user_ids=user_id,
+            fields=['nickname', 'site']
         )
         response = self.make_get_request('users.get', data=data)
         response_data = response.json().get('response')
         if not response_data:
             raise Exception(response.json().get('error'))
-        return VKUser.json2user(response_data[0])
+            return VKUser.json2user(response_data[0])
 
     def are_friends(self, user_ids):
-      response = self.make_get_request('friends.areFriends', dict(user_ids=user_ids), token=USER_TOKEN)
-      return bool(response.json()['response'][0]['friend_status'])
+        response = self.make_get_request('friends.areFriends', dict(user_ids=user_ids), token=USER_TOKEN)
+        return bool(response.json()['response'][0]['friend_status'])
 
     def get_friends_mutual(self, user1, user2):
-      data = dict(
-        source_uid=user1,
-        target_uid=user2
+        data = dict(
+            source_uid=user1,
+            target_uid=user2
         )
         response = self.make_get_request('friends.getMutual', data, token=USER_TOKEN)
         return list(map(self.get, response.json()['response']))
-
 
 def main():
     users = VKUsers()
